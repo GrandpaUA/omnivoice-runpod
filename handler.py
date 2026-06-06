@@ -3,13 +3,19 @@ import torch
 import soundfile as sf
 import base64
 import io
+import os
+import urllib.request
 from omnivoice import OmniVoice
 
 model = None
+SPEAKER_PATH = "/speaker.wav"
+SPEAKER_URL = "https://raw.githubusercontent.com/GrandpaUA/omnivoice-runpod/main/speaker.wav"
 
 def load_model():
     global model
     if model is None:
+        if not os.path.exists(SPEAKER_PATH):
+            urllib.request.urlretrieve(SPEAKER_URL, SPEAKER_PATH)
         model = OmniVoice.from_pretrained(
             "k2-fsa/OmniVoice",
             device_map="cuda:0",
@@ -30,6 +36,7 @@ def handler(job):
         text=text,
         speed=speed,
         language="Ukrainian",
+        ref_audio=SPEAKER_PATH,
     )
 
     buf = io.BytesIO()
